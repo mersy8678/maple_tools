@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Mchaos Calculator v1.2</title>
+    <style>
+        .desc {
+            width: 260px;
+            padding-left: 10px;
+        }
+        .box {
+            width: 90px;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="app" style="margin:20px 20px;">
+      <table>
+          <tr><th><th>Input</th><th class="desc">Description</th></tr>
+        <tr><td>Equipment Type</td><td><select name="equip_type" id="equip_type" onchange="ChangeEquipType()" class="box">
+          <option value="200">200Lv</option>
+          <option value="160">160Lv</option>
+          <option value="150">150Lv</option>
+          <option value="140">140Lv</option>
+          <option value="130">130Lv</option>
+          <option value="tyrant">Tyrant</option>
+      </select></td><td class="desc">装備のレベル／種別を候補から選択</td></tr>
+      <tr><td></td><td colspan="2"><form id="equip_subtype">
+        <input type="radio" id="gloves" name="equip_subtype" value="gloves">Gloves
+        <!-- <input type="radio" id="shoulder" name="equip_subtype" value="shoulder">Shoulder -->
+        <input type="radio" id="other" name="equip_subtype" value="other" checked>Other
+    </form></td></tr>
+      <tr><td>Star</td>
+        <td><input type="number" id="star" value="17" onchange="ChangeStar()"  class="box"></td><td class="desc">星の数を入力（0〜22）</td></tr>
+        <tr></tr><td>Main stats</td>
+        <td><input type="number" id="stat" value="80" class="box"></td><td class="desc">メインステータスの上昇量を入力</td></tr>
+        <tr></tr><td>ATK (MAT)</td><td><input type="number" id="atk" value="46"  class="box"></td><td class="desc">Attack Powerの上昇量を入力</td></tr>
+        <tr></tr><td>Upgrade Times</td><td><input type="number" id="ug" value="3"  class="box"></td><td class="desc">強化回数を入力</td></tr><tr><td></td>
+        <tr></tr><td>Scroll Type
+        </td><td>
+            <form id="scroll">
+                <input type="radio" id="scroll_ss" name="scroll" value="SS" checked>SS
+                <input type="radio" id="scroll_ags" name="scroll" value="AGS" disabled>AGS
+            </form></td><td class="desc">強化書を選択</td></tr><tr><td></td>
+      <td><input type="button" value="Calculate" onclick="Calculate()"  class="box"></td><td></td></tr>
+    </table>
+      <div id="result"></div>
+
+    </div>
+    <script>
+        const sf_tab = {
+            "130": [
+                [2, 0], [4, 0], [6, 0], [8, 0], [10, 0],
+                [13, 0], [16, 0], [19, 0], [22, 0], [25, 0],
+                [28, 0], [31, 0], [34, 0], [37, 0], [40, 0],
+                [48, 8], [56, 17], [64, 27], [72, 38], [80, 50],
+                [88, 63], [96, 78],
+            ],
+            "140": [
+                [2, 0], [4, 0], [6, 0], [8, 0], [10, 0],
+                [13, 0], [16, 0], [19, 0], [22, 0], [25, 0],
+                [28, 0], [31, 0], [34, 0], [37, 0], [40, 0],
+                [49, 9], [58, 19], [67, 30], [76, 42], [85, 55],
+                [94, 69], [103, 85],
+            ],
+            "150": [
+                [2, 0], [4, 0], [6, 0], [8, 0], [10, 0],
+                [13, 0], [16, 0], [19, 0], [22, 0], [25, 0],
+                [28, 0], [31, 0], [34, 0], [37, 0], [40, 0],
+                [51, 10], [62, 21], [73, 33], [84, 46], [95, 60],
+                [106, 75], [117, 92],
+            ],
+            "160": [
+                [2, 0], [4, 0], [6, 0], [8, 0], [10, 0],
+                [13, 0], [16, 0], [19, 0], [22, 0], [25, 0],
+                [28, 0], [31, 0], [34, 0], [37, 0], [40, 0],
+                [53, 11], [66, 23], [79, 36], [92, 50], [105, 65],
+                [118, 81], [131, 99],
+            ],
+            "200": [
+                [2, 0], [4, 0], [6, 0], [8, 0], [10, 0],
+                [13, 0], [16, 0], [19, 0], [22, 0], [25, 0],
+                [28, 0], [31, 0], [34, 0], [37, 0], [40, 0],
+                [55, 14], [70, 29], [85, 45], [100, 62], [115, 80],
+                [130, 99], [145, 122],
+            ],
+            "tyrant": [
+                [22, 0], [44, 0], [66, 0], [88, 0], [110, 0],
+                [110, 8], [110, 17], [110, 27], [110, 38], [110, 50],
+                [110, 63], [110, 77], [110, 92], [110, 108], [110, 125],
+            ],
+            "gloves": [
+                [0, 0], [0, 0], [0, 0], [0, 0], [0, 1], 
+                [0, 1], [0, 2], [0, 2], [0, 3], [0, 3], 
+                [0, 4], [0, 4], [0, 5], [0, 6], [0, 7], 
+                [0, 7], [0, 7], [0, 7], [0, 7], [0, 7], 
+                [0, 7], [0, 7], 
+            ]
+        };
+        function ChangeEquipType() {
+            const equip_type = document.getElementById('equip_type').value;
+            const scroll_ags = document.getElementById('scroll_ags');
+            const scroll_ss = document.getElementById('scroll_ss');
+            if (equip_type === "150" || equip_type === "140") {
+                scroll_ags.disabled = false;
+            } else {
+                scroll_ags.disabled = true;
+                scroll_ss.checked = true;
+            }
+            ChangeStar();
+        }
+        function ChangeStar() {
+            const star = document.getElementById('star');
+            const star_val = parseInt(star.value);
+            const equip_type = document.getElementById('equip_type').value;
+            const max_threshold = 22;
+            const min_threshold = 0;
+            if (equip_type === "tyrant") {
+                max_threshold = 15;
+            }
+            if (star_val > max_threshold) {
+                star.value = max_threshold;
+            } else if (star_val < min_threshold) {
+                star.value = min_threshold;
+            }
+        }
+        function AddSign(num) {
+            if (num < 0) {
+                return String(num);
+            } else {
+                return '+' + String(num);
+            }
+        }
+        function Calculate() {
+            const star = parseInt(document.getElementById('star').value)-1;
+            const equip_type = document.getElementById('equip_type').value;
+            const is_tyrant = equip_type == "tyrant";
+            const ug = parseInt(document.getElementById('ug').value);
+            const scroll_type = document.getElementById('scroll').scroll.value;
+            const is_glove = document.getElementById('equip_subtype').equip_subtype.value == "gloves";
+            const is_shoulder = document.getElementById('equip_subtype').equip_subtype.value == "shoulder";
+            let stat = parseInt(document.getElementById('stat').value);
+            let atk = parseInt(document.getElementById('atk').value);
+
+            if (star > 0) {
+                stat -= sf_tab[equip_type][star][0];
+                atk -= sf_tab[equip_type][star][1];
+                if (!is_tyrant && is_glove) {
+                    stat -= sf_tab["gloves"][star][0];
+                    atk -= sf_tab["gloves"][star][1];
+                }
+            }
+            if (ug > 0) {
+                if (scroll_type === "SS") {
+                    if (is_glove) {
+                        atk -= 4 * ug;
+                    } else {
+                        stat -= 9 * ug;
+                    }
+                    if (is_shoulder) {
+                        if (ug >= 4) {
+                            atk--;
+                        }
+                    }
+                } else if (scroll_type === "AGS") {
+                    atk -= 4 * ug;
+                    stat -= 3 * ug;
+                }
+            }
+
+            let text = "<p>" + scroll_type + "埋めとの比較： Main stats " + AddSign(stat) + ", ATK " + AddSign(atk) + "</p><br>Mchaos候補";
+            let begin = Math.round(atk / 9);
+            if (scroll_type === "SS") {
+                if (is_glove) {
+                    atk += begin * 4;
+                } else {
+                    stat += begin * 9;
+                }
+            } else if (scroll_type === "AGS") {
+                atk += begin * 4;
+                stat += begin * 3;
+            }
+            for (let i = 0; i < 3; i++) {
+                let n = begin + i;
+                if (n > ug) {
+                    break;
+                }
+                text += "<p>" + n + " slot： Main stats " + AddSign(stat) + ", ATK " + AddSign(atk) + "</p>";
+                if (scroll_type === "SS") {
+                    if (is_glove) {
+                        atk += 4;
+                    } else {
+                        stat += 9;
+                    }
+                } else if (scroll_type === "AGS") {
+                    atk += 4;
+                    stat += 3;
+                }
+            }
+            let result = document.getElementById('result');
+            result.innerHTML = text;
+        }
+    </script>
+  </body>
+</html>
