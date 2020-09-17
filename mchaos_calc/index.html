@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Mchaos Calculator</title>
+        <link rel="stylesheet" href="./style.css">
+    </head>
+    <body>
+        <div id="app">
+            <table>
+                <tr><th><th>Input</th><th class="desc">Description</th></tr>
+                <tr><td>Equipment Type</td><td><select name="equip_type" id="equip_type" onchange="ChangeEquipType()" class="box">
+                <option value="200">200Lv</option>
+                <option value="160">160Lv</option>
+                <option value="150">150Lv</option>
+                <option value="140">140Lv</option>
+                <option value="130">130Lv</option>
+                <option value="tyrant">Tyrant</option>
+            </select></td><td class="desc">装備のレベル／種別を候補から選択</td></tr>
+            <tr><td></td><td colspan="2"><form id="equip_subtype">
+                <input type="radio" id="gloves" name="equip_subtype" value="gloves">Gloves
+                <input type="radio" id="other" name="equip_subtype" value="other" checked>Other
+            </form></td></tr>
+            <tr><td>Star</td>
+                <td><input type="number" id="star" value="17" onchange="ChangeStar()"  class="box"></td><td class="desc">星の数を入力（0〜22）</td></tr>
+                <tr></tr><td>Main stats</td>
+                <td><input type="number" id="stat" value="80" class="box"></td><td class="desc">メインステータスの上昇量を入力</td></tr>
+                <tr></tr><td>ATK (MAT)</td><td><input type="number" id="atk" value="46"  class="box"></td><td class="desc">Attack Powerの上昇量を入力</td></tr>
+                <tr></tr><td>Upgrade Times</td><td><input type="number" id="ug" value="3"  class="box"></td><td class="desc">強化回数を入力</td></tr><tr><td></td>
+                <tr></tr><td>Scroll Type
+                </td><td>
+                    <form id="scroll">
+                        <input type="radio" id="scroll_ss" name="scroll" value="SS" checked>SS
+                        <input type="radio" id="scroll_ags" name="scroll" value="AGS" disabled>AGS
+                    </form></td><td class="desc">強化書を選択</td></tr><tr><td></td>
+            <td><input type="button" value="Calculate" onclick="Calculate()"  class="box"></td><td></td></tr>
+            </table>
+            <div id="result"></div>
+        </div>
+        <script src="./app.js"></script>
+    </body>
+</html>
